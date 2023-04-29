@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id Int @id @default(autoincrement())
+  title String
+  price Int
+  time String @default("")
+  isActive Boolean @default(true)
+
+  categoryId Int?
+  category Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  title String
+
+  services Service[]
+  specialists CategoriesOnSpecialists[]
+}
+
+model Specialist {
+  id Int @id @default(autoincrement())
+  name String
+  qualification String
+  photoUrl String? @default("../../../assets/img/default-avatar.png")
+
+  categories CategoriesOnSpecialists[]
+  dates DatesOnSpecialists[]
+}
+
+model CategoriesOnSpecialists {
+  specialist  Specialist     @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  specialistId     Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  @@id([specialistId, categoryId])
+}
+
+model DatesOnSpecialists {
+  specialist  Specialist     @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  specialistId  Int
+  date Date @relation(fields: [dateId], references: [id], onDelete: Cascade)
+  dateId Int
+
+  isWorkingDate Boolean @default(false)
+
+  @@id([specialistId, dateId])
+}
+
+model Date {
+  id Int @id @default(autoincrement())
+  date String @unique
+  time Time[]
+
+  specialists DatesOnSpecialists[]
+}
+
+model Time {
+  id Int @id @default(autoincrement())
+  morningTime String[] @default(["9:00", "9:30", "10:00", "10:30", "11:00", "11:30"])
+  afternoonTime String[] @default(["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30"])
+  eveningTime String[] @default(["18:00", "18:30", "19:00", "19:30", "20:00", "20:30"])
+
+  dateId Int 
+  date Date @relation(fields: [dateId], references: [id], onDelete: Cascade)
+
+  specialistId Int
+}
+
+model Client {
+  id Int @id @default(autoincrement())
+  name String
+  telephoneNumber String
+  chatId String?
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+  clientName String
+  clientTelephone String
+  clientComment String
+  masterName String
+  dateTime String
+  servicesInfo String
+  totalPrice Int
+  servicesCount Int
+}
