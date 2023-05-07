@@ -16,6 +16,14 @@ export class EditSpecialistDto {
   qualification: string;
 
   @IsOptional()
+  @IsString()
+  timeTable: string;
+
+  @IsOptional()
+  @IsString()
+  beginingDate: string;
+
+  @IsOptional()
   @IsArray()
   categoryIds: number[];
 }

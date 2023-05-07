@@ -1,13 +1,18 @@
-import { Controller, Get, Body, Post, Delete, Patch } from '@nestjs/common';
 import {
-  Param,
+  Controller,
+  Get,
+  Body,
+  Post,
+  Delete,
+  Patch,
   UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common/decorators';
+} from '@nestjs/common';
+import { Param, Res, UseInterceptors } from '@nestjs/common/decorators';
 import { ParseIntPipe, ParseArrayPipe } from '@nestjs/common/pipes';
 import { CreateSpecialistDto, EditSpecialistDto } from './dto';
 import { SpecialistService } from './specialist.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 
 @Controller('specialist')
 export class SpecialistController {
@@ -30,18 +35,24 @@ export class SpecialistController {
     return this.specialistService.getSpecialistsByServiceIds(serviceIds);
   }
 
+  @Get('/img/:imgpath')
+  getImage(@Param('imgpath') imagePath: string, @Res() res) {
+    return res.sendFile(imagePath, { root: 'uploads' });
+  }
+
   @Post('add')
   addSpecialist(@Body() dto: CreateSpecialistDto) {
     return this.specialistService.addSpecialist(dto);
   }
 
   @Post('upload/:specialistid')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image', { dest: './uploads' }))
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Param('specialistid', ParseIntPipe) id: number,
   ) {
-    console.log(file);
+    const path = file.path.slice(8);
+    return this.specialistService.setImageUrl(path, id);
   }
 
   @Patch('edit')

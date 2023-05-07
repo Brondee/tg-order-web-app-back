@@ -10,6 +10,12 @@ export class CreateSpecialistDto {
   @IsString()
   qualification: string;
 
+  @IsString()
+  timeTable: string;
+
+  @IsString()
+  beginingDate: string;
+
   @IsOptional()
   @IsArray()
   categoryIds: number[];

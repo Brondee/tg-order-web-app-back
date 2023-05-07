@@ -13,6 +13,7 @@ export class DateService {
       },
     });
     let isWorkingDate = true;
+    let isWorkingDateChanged = null;
     if (dateDb !== null) {
       const dateSpec = await this.prisma.datesOnSpecialists.findFirst({
         where: {
@@ -21,10 +22,11 @@ export class DateService {
         },
       });
       if (dateSpec !== null) {
+        isWorkingDateChanged = dateSpec.isWorkingDateChanged;
         isWorkingDate = dateSpec.isWorkingDate;
       }
     }
-    return { ...dateDb, isWorkingDate };
+    return { ...dateDb, isWorkingDate, isWorkingDateChanged };
   }
 
   async getDateTime(date: string, specId: number) {
@@ -135,19 +137,45 @@ export class DateService {
   async editDate(dto: EditDateDto) {
     const specialistId = dto.specialistId;
     delete dto['specialistId'];
-    const date = await this.prisma.date.findFirst({
+    let dateDb = null;
+    dateDb = await this.prisma.date.findFirst({
       where: {
         date: dto.date,
       },
     });
-    return await this.prisma.datesOnSpecialists.update({
+    if (!dateDb) {
+      dateDb = await this.prisma.date.create({
+        data: {
+          date: dto.date,
+        },
+      });
+    }
+    const datesOnSpec = await this.prisma.datesOnSpecialists.findFirst({
       where: {
-        specialistId_dateId: { dateId: date.id, specialistId },
-      },
-      data: {
-        isWorkingDate: dto.isWorkingDate,
+        dateId: dateDb.id,
+        specialistId,
       },
     });
+    if (datesOnSpec) {
+      return this.prisma.datesOnSpecialists.update({
+        where: {
+          specialistId_dateId: { dateId: dateDb.id, specialistId },
+        },
+        data: {
+          isWorkingDateChanged: dto.isWorkingDateChanged,
+          isWorkingDate: dto.isWorkingDate,
+        },
+      });
+    } else {
+      return this.prisma.datesOnSpecialists.create({
+        data: {
+          dateId: dateDb.id,
+          specialistId,
+          isWorkingDate: dto.isWorkingDate,
+          isWorkingDateChanged: dto.isWorkingDateChanged,
+        },
+      });
+    }
   }
 
   async editTime(dto: EditTimeDto) {

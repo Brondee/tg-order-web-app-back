@@ -10,4 +10,8 @@ export class EditDateDto {
   @IsOptional()
   @IsBoolean()
   isWorkingDate: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isWorkingDateChanged: boolean;
 }

@@ -30,7 +30,9 @@ model Specialist {
   id Int @id @default(autoincrement())
   name String
   qualification String
-  photoUrl String? @default("../../../assets/img/default-avatar.png")
+  photoUrl String? @default("043343b9837fb8953545103e4071f8a3")
+  timeTable String
+  beginingDate String
 
   categories CategoriesOnSpecialists[]
   dates DatesOnSpecialists[]
@@ -51,8 +53,9 @@ model DatesOnSpecialists {
   date Date @relation(fields: [dateId], references: [id], onDelete: Cascade)
   dateId Int
 
-  isWorkingDate Boolean @default(false)
-
+  isWorkingDate Boolean?
+  isWorkingDateChanged Boolean @default(false)
+  
   @@id([specialistId, dateId])
 }
 

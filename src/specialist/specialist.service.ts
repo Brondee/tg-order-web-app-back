@@ -69,6 +69,17 @@ export class SpecialistService {
     return specialist;
   }
 
+  setImageUrl(path: string, id: number) {
+    return this.prisma.specialist.update({
+      where: {
+        id,
+      },
+      data: {
+        photoUrl: path,
+      },
+    });
+  }
+
   async editSpecialist(dto: EditSpecialistDto) {
     const categoryIds = dto['categoryIds'];
     const newData = categoryIds?.map((id) => {

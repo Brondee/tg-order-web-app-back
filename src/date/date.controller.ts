@@ -36,7 +36,7 @@ export class DatesController {
     return this.dateService.addDate(dto);
   }
 
-  @Patch('edit')
+  @Patch('editDate')
   editDate(@Body() dto: EditDateDto) {
     return this.dateService.editDate(dto);
   }

@@ -1,4 +1,7 @@
-const whiteList = ['http://localhost:3000'];
+const whiteList = [
+  'http://localhost:3000',
+  'https://6457db2d15dd340008762b73--superlative-dango-7e09cd.netlify.app',
+];
 const corsOptions = {
   origin: (origin, callback) => {
     if (whiteList.indexOf(origin) !== -1 || !origin) {

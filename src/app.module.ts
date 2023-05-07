@@ -8,6 +8,14 @@ import { ClientModule } from './client/client.module';
 import { OrderModule } from './order/order.module';
 
 @Module({
-  imports: [ServicesModule, PrismaModule, SpecialistModule, DatesModule, CategoryModule, ClientModule, OrderModule],
+  imports: [
+    ServicesModule,
+    PrismaModule,
+    SpecialistModule,
+    DatesModule,
+    CategoryModule,
+    ClientModule,
+    OrderModule,
+  ],
 })
 export class AppModule {}
