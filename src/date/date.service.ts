@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateDateDto, EditDateDto, EditTimeDto } from './dto';
+import { CreateDateDto, EditDateDto, EditTimeDto, ReturnTimeDto } from './dto';
 
 @Injectable()
 export class DateService {
@@ -12,7 +12,7 @@ export class DateService {
         date,
       },
     });
-    let isWorkingDate = true;
+    let isWorkingDate = 'none';
     let isWorkingDateChanged = null;
     if (dateDb !== null) {
       const dateSpec = await this.prisma.datesOnSpecialists.findFirst({
@@ -39,11 +39,6 @@ export class DateService {
         time: true,
       },
     });
-    const day = new Date(date).getDay();
-    let isWorkingDate = true;
-    if (day == 0 || day == 6) {
-      isWorkingDate = false;
-    }
     if (dateDb == null) {
       dateDb = await this.prisma.date.create({
         data: {
@@ -54,7 +49,6 @@ export class DateService {
         data: {
           dateId: dateDb.id,
           specialistId: specId,
-          isWorkingDate,
         },
       });
     }
@@ -83,7 +77,6 @@ export class DateService {
         data: {
           dateId: dateDb.id,
           specialistId: specId,
-          isWorkingDate,
         },
       });
     }
@@ -213,11 +206,88 @@ export class DateService {
           },
         },
         data: {
-          isWorkingDate: false,
+          isWorkingDate: 'false',
         },
       });
     }
     return { time };
+  }
+
+  async returnTime(dto: ReturnTimeDto) {
+    const orderId = Number(dto.orderId);
+    const totalTime = Number(dto.totalTime);
+    const orderInfo = await this.prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+    const date = orderInfo.dateTime.split(', ')[0];
+    const curTime = 'disabled ' + orderInfo.dateTime.split(', ')[1];
+    const specialistId = orderInfo.masterId;
+    const repeatReturnTime = Math.ceil(totalTime / 30);
+    const dateDb = await this.prisma.date.findFirst({
+      where: {
+        date,
+      },
+    });
+    const timeDb = await this.prisma.time.findFirst({
+      where: {
+        dateId: dateDb.id,
+        specialistId,
+      },
+    });
+    let newMorningTime = [...timeDb.morningTime];
+    let newAfternoonTime = [...timeDb.afternoonTime];
+    let newEveningTime = [...timeDb.eveningTime];
+
+    if (timeDb.morningTime.indexOf(curTime) !== -1) {
+      for (let i = 0; i < repeatReturnTime; i++) {
+        let index = timeDb.morningTime.indexOf(curTime) + i;
+        if (newMorningTime[index]) {
+          newMorningTime[index] = newMorningTime[index].replace('disabled', '');
+        }
+        if (!newMorningTime[index]) {
+          let newI = repeatReturnTime - i;
+          for (let i = 0; i < newI; i++) {
+            newAfternoonTime[i] = newAfternoonTime[i].replace('disabled', '');
+          }
+          break;
+        }
+      }
+    } else if (timeDb.afternoonTime.indexOf(curTime) !== -1) {
+      for (let i = 0; i < repeatReturnTime; i++) {
+        let index = timeDb.afternoonTime.indexOf(curTime) + i;
+        if (newAfternoonTime[index]) {
+          newAfternoonTime[index] = newAfternoonTime[index]
+            .replace('disabled', '')
+            .trim();
+        }
+        if (!newAfternoonTime[index]) {
+          let newI = repeatReturnTime - i;
+          for (let i = 0; i < newI; i++) {
+            newEveningTime[i] = newEveningTime[i].replace('disabled', '');
+          }
+          break;
+        }
+      }
+    } else if (timeDb.eveningTime.indexOf(curTime) !== -1) {
+      for (let i = 0; i < repeatReturnTime; i++) {
+        let index = timeDb.eveningTime.indexOf(curTime) + i;
+        if (newEveningTime[index])
+          newEveningTime[index] = newEveningTime[index].replace('disabled', '');
+      }
+    }
+
+    return this.prisma.time.update({
+      where: {
+        id: timeDb.id,
+      },
+      data: {
+        morningTime: newMorningTime,
+        afternoonTime: newAfternoonTime,
+        eveningTime: newEveningTime,
+      },
+    });
   }
 
   deleteDateById(id: number) {

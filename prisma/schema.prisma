@@ -53,7 +53,7 @@ model DatesOnSpecialists {
   date Date @relation(fields: [dateId], references: [id], onDelete: Cascade)
   dateId Int
 
-  isWorkingDate Boolean?
+  isWorkingDate String? @default("none")
   isWorkingDateChanged Boolean @default(false)
   
   @@id([specialistId, dateId])
@@ -89,11 +89,29 @@ model Client {
 model Order {
   id Int @id @default(autoincrement())
   clientName String
+  clientTelegram String
   clientTelephone String
   clientComment String
+  clientChatId String?
+  masterId Int
   masterName String
   dateTime String
+  totalTime Int
   servicesInfo String
   totalPrice Int
   servicesCount Int
+}
+
+model General {
+  id Int @id @default(autoincrement())
+  companyTelephone String
+  companyAddress String
+  companyDescription String
+}
+
+model AdminInfo {
+  id Int @id @default(autoincrement())
+  BotPaid String @default("false") 
+  payDate String
+  billId String
 }

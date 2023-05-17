@@ -5,18 +5,35 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto';
+import { EditOrderDto } from './dto/EditOrderDto';
 
 @Controller('order')
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
-  @Get('all')
-  getAllOrders() {
-    return this.orderService.getAllOrders();
+  @Get('all/:offset')
+  getAllOrders(@Param('offset', ParseIntPipe) offset: number) {
+    return this.orderService.getAllOrders(offset);
+  }
+
+  @Get('tg/:username')
+  getOrdersByUsername(@Param('username') username: string) {
+    return this.orderService.getOrdersByUsername(username);
+  }
+
+  @Get('today/:offset')
+  getTodayOrders(@Param('offset', ParseIntPipe) offset: number) {
+    return this.orderService.getTodayOrders(offset);
+  }
+
+  @Get('tomorrow')
+  getTomorrowOrders() {
+    return this.orderService.getTomorrowOrders();
   }
 
   @Get(':id')
@@ -27,6 +44,11 @@ export class OrderController {
   @Post('add')
   addOrder(@Body() dto: CreateOrderDto) {
     return this.orderService.addOrder(dto);
+  }
+
+  @Patch('edit')
+  setChatId(@Body() dto: EditOrderDto) {
+    return this.orderService.setChatId(dto);
   }
 
   @Delete('del/:id')

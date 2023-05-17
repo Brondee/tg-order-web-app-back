@@ -7,7 +7,11 @@ export class SpecialistService {
   constructor(private prisma: PrismaService) {}
 
   getAllSpecialists() {
-    return this.prisma.specialist.findMany();
+    return this.prisma.specialist.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   getSpecialistsById(specialistsId: number) {
@@ -31,6 +35,9 @@ export class SpecialistService {
       },
       include: {
         categories: true,
+      },
+      orderBy: {
+        name: 'asc',
       },
     });
     specialists = specialists.map((specialist) => {

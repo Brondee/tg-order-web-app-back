@@ -4,8 +4,8 @@ export class CreateDateDto {
   @IsString()
   date: string;
 
-  @IsBoolean()
-  isWorkingDate: boolean;
+  @IsString()
+  isWorkingDate: string;
 
   @IsNumber()
   specialistId: number;

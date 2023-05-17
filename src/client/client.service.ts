@@ -7,7 +7,11 @@ export class ClientService {
   constructor(private prisma: PrismaService) {}
 
   getAllClients() {
-    return this.prisma.client.findMany();
+    return this.prisma.client.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   getClientById(id: number) {

@@ -11,6 +11,9 @@ export class ServicesService {
       include: {
         category: true,
       },
+      orderBy: {
+        title: 'asc',
+      },
     });
   }
 
@@ -20,6 +23,9 @@ export class ServicesService {
       where: {
         id: { in: ids },
       },
+      orderBy: {
+        title: 'asc',
+      },
     });
   }
 
@@ -27,6 +33,9 @@ export class ServicesService {
     return this.prisma.service.findMany({
       where: {
         categoryId: id,
+      },
+      orderBy: {
+        title: 'asc',
       },
     });
   }

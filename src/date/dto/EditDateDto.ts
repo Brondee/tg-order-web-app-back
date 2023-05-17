@@ -8,8 +8,8 @@ export class EditDateDto {
   specialistId: number;
 
   @IsOptional()
-  @IsBoolean()
-  isWorkingDate: boolean;
+  @IsString()
+  isWorkingDate: string;
 
   @IsOptional()
   @IsBoolean()

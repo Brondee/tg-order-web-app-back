@@ -9,7 +9,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { DateService } from './date.service';
-import { CreateDateDto, EditDateDto, EditTimeDto } from './dto';
+import { CreateDateDto, EditDateDto, EditTimeDto, ReturnTimeDto } from './dto';
 
 @Controller('dates')
 export class DatesController {
@@ -44,6 +44,11 @@ export class DatesController {
   @Patch('editTime')
   editTime(@Body() dto: EditTimeDto) {
     return this.dateService.editTime(dto);
+  }
+
+  @Patch('returnTime')
+  returnTime(@Body() dto: ReturnTimeDto) {
+    return this.dateService.returnTime(dto);
   }
 
   @Delete('del/:id')
