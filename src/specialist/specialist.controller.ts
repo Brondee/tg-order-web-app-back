@@ -45,6 +45,16 @@ export class SpecialistController {
     return this.specialistService.addSpecialist(dto);
   }
 
+  @Post('/single/')
+  getSpecialistsByName(@Body() dto: { name: string }) {
+    return this.specialistService.getSpecialistsByName(dto);
+  }
+
+  @Post('cando')
+  checkSpecialist(@Body() dto: { name: string; services: string[] }) {
+    return this.specialistService.checkSpecialist(dto);
+  }
+
   @Post('upload/:specialistid')
   @UseInterceptors(FileInterceptor('image', { dest: './uploads' }))
   uploadFile(

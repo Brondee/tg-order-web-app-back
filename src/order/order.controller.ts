@@ -26,6 +26,11 @@ export class OrderController {
     return this.orderService.getOrdersByUsername(username);
   }
 
+  @Get('chat/:chatId')
+  getOrdersByChatId(@Param('chatId') chatId: string) {
+    return this.orderService.getOrdersByChatId(chatId);
+  }
+
   @Get('today/:offset')
   getTodayOrders(@Param('offset', ParseIntPipe) offset: number) {
     return this.orderService.getTodayOrders(offset);

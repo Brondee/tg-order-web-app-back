@@ -7,7 +7,4 @@ export class AddAdminInfo {
 
   @IsString()
   payDate: string;
-
-  @IsString()
-  billId: string;
 }

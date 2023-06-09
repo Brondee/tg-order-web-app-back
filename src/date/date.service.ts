@@ -1,6 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  NotAcceptableException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateDateDto, EditDateDto, EditTimeDto, ReturnTimeDto } from './dto';
+import {
+  CheckTimeDto,
+  CreateDateDto,
+  EditDateDto,
+  EditTimeDto,
+  ReturnTimeDto,
+} from './dto';
+import { getDateArray } from '../utils/getDateArray';
 
 @Injectable()
 export class DateService {
@@ -27,6 +39,19 @@ export class DateService {
       }
     }
     return { ...dateDb, isWorkingDate, isWorkingDateChanged };
+  }
+
+  async getDatesById(specId: number) {
+    const specDb = await this.prisma.specialist.findUnique({
+      where: {
+        id: specId,
+      },
+    });
+    const dateArray = getDateArray(
+      specDb.beginingDate,
+      specDb.timeTable,
+    ).filter((date) => date.isWorking == true);
+    return dateArray;
   }
 
   async getDateTime(date: string, specId: number) {
@@ -125,6 +150,100 @@ export class DateService {
         },
       },
     });
+  }
+
+  async checkTime(dto: CheckTimeDto) {
+    let endDate = new Date();
+    endDate.setDate(endDate.getDate() + 29);
+    const specialistDb = await this.prisma.specialist.findFirst({
+      where: {
+        name: dto.specialistName,
+      },
+    });
+    if (!specialistDb) {
+      return new NotFoundException('specialist is not found');
+    }
+    if (new Date(dto.date) <= endDate) {
+      if (
+        Number(dto.date.split('-')[1]) <= 12 &&
+        Number(dto.date.split('-')[2]) <= 31
+      ) {
+        if (
+          Number(dto.time.slice(0, -3)) < 21 &&
+          Number(dto.time.slice(0, -3)) > 8
+        ) {
+          let dateDb = await this.prisma.date.findFirst({
+            where: {
+              date: dto.date,
+            },
+          });
+          if (!dateDb) {
+            dateDb = await this.prisma.date.create({
+              data: {
+                date: dto.date,
+              },
+            });
+          }
+          let timeDb = await this.prisma.time.findFirst({
+            where: {
+              specialistId: specialistDb.id,
+              dateId: dateDb.id,
+            },
+          });
+          if (!timeDb) {
+            timeDb = await this.prisma.time.create({
+              data: {
+                specialistId: specialistDb.id,
+                dateId: dateDb.id,
+              },
+            });
+          }
+          const datesArray = getDateArray(
+            specialistDb.beginingDate,
+            specialistDb.timeTable,
+          );
+          for (let i = 0; i < datesArray.length; i++) {
+            if (datesArray[i].fullDate === dto.date) {
+              if (!datesArray[i].isWorking) {
+                return new NotAcceptableException('Date is not working');
+              }
+            }
+          }
+          const datesOnSpec = await this.prisma.datesOnSpecialists.findFirst({
+            where: {
+              dateId: dateDb.id,
+              specialistId: specialistDb.id,
+            },
+          });
+          if (!datesOnSpec) return false;
+          if (!datesOnSpec.isWorkingDate) return true;
+          const disabledTime = 'disabled ' + dto.time;
+          if (
+            timeDb.morningTime.indexOf(dto.time) !== -1 ||
+            timeDb.afternoonTime.indexOf(dto.time) !== -1 ||
+            timeDb.eveningTime.indexOf(dto.time) !== -1
+          ) {
+            return false;
+          } else if (
+            timeDb.morningTime.indexOf(disabledTime) !== -1 ||
+            timeDb.afternoonTime.indexOf(disabledTime) !== -1 ||
+            timeDb.eveningTime.indexOf(disabledTime) !== -1
+          ) {
+            return true;
+          } else {
+            return new BadRequestException('Invalid time');
+          }
+        } else {
+          return new BadRequestException('Is not working hours');
+        }
+      } else {
+        return new BadRequestException('Invalid date or day');
+      }
+    } else {
+      return new BadRequestException(
+        'Can not request not more than one month further',
+      );
+    }
   }
 
   async editDate(dto: EditDateDto) {
@@ -244,12 +363,16 @@ export class DateService {
       for (let i = 0; i < repeatReturnTime; i++) {
         let index = timeDb.morningTime.indexOf(curTime) + i;
         if (newMorningTime[index]) {
-          newMorningTime[index] = newMorningTime[index].replace('disabled', '');
+          newMorningTime[index] = newMorningTime[index]
+            .replace('disabled', '')
+            .trim();
         }
         if (!newMorningTime[index]) {
           let newI = repeatReturnTime - i;
           for (let i = 0; i < newI; i++) {
-            newAfternoonTime[i] = newAfternoonTime[i].replace('disabled', '');
+            newAfternoonTime[i] = newAfternoonTime[i]
+              .replace('disabled', '')
+              .trim();
           }
           break;
         }

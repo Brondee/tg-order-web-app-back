@@ -47,6 +47,36 @@ export class OrderService {
       .filter((order) => order !== null);
   }
 
+  async getOrdersByChatId(chatId: string) {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        clientChatId: chatId,
+      },
+    });
+    const today = new Date();
+    let date = String(today.getDate());
+    let year = String(today.getFullYear());
+    let month = String(today.getMonth() + 1);
+    if (date.length === 1) {
+      date = '0' + date;
+    }
+    if (month.length === 1) {
+      month = '0' + month;
+    }
+    const fullDate = year + '-' + month + '-' + date;
+    return orders
+      .map((order) => {
+        const { dateTime } = order;
+        const dateStr = dateTime.split(',')[0];
+        if (Date.parse(fullDate) <= Date.parse(dateStr)) {
+          return order;
+        } else {
+          return null;
+        }
+      })
+      .filter((order) => order !== null);
+  }
+
   getOrderById(id: number) {
     return this.prisma.order.findUnique({
       where: { id },

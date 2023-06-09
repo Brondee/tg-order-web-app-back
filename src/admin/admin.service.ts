@@ -23,7 +23,6 @@ export class AdminService {
       adminInfoDb = await this.prisma.adminInfo.create({
         data: {
           payDate: 'none',
-          billId: '',
         },
       });
     }

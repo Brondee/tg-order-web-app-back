@@ -8,8 +8,4 @@ export class EditAdminInfo {
   @IsOptional()
   @IsString()
   payDate: string;
-
-  @IsOptional()
-  @IsString()
-  billId: string;
 }

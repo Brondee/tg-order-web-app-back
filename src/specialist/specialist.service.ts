@@ -14,6 +14,14 @@ export class SpecialistService {
     });
   }
 
+  getSpecialistsByName(dto: { name: string }) {
+    return this.prisma.specialist.findFirst({
+      where: {
+        name: dto.name,
+      },
+    });
+  }
+
   getSpecialistsById(specialistsId: number) {
     return this.prisma.specialist.findFirst({
       where: {
@@ -74,6 +82,45 @@ export class SpecialistService {
     });
 
     return specialist;
+  }
+
+  async checkSpecialist(dto: { name: string; services: string[] }) {
+    const specDb = await this.prisma.specialist.findFirst({
+      where: {
+        name: dto.name,
+      },
+    });
+    let categoryIds = [];
+    if (dto.services instanceof Array) {
+      for (let i = 0; i < dto.services.length; i++) {
+        const service = await this.prisma.service.findFirst({
+          where: {
+            title: dto.services[i],
+          },
+        });
+        if (service) categoryIds.push(service.categoryId);
+      }
+    } else {
+      const service = await this.prisma.service.findFirst({
+        where: {
+          title: dto.services,
+        },
+      });
+      if (service) categoryIds.push(service.categoryId);
+    }
+
+    let isMatching = true;
+    for (let i = 0; i < categoryIds.length; i++) {
+      const categoryOnSpec =
+        await this.prisma.categoriesOnSpecialists.findFirst({
+          where: {
+            specialistId: specDb.id,
+            categoryId: categoryIds[i],
+          },
+        });
+      if (categoryOnSpec == null) isMatching = false;
+    }
+    return { isMatching };
   }
 
   setImageUrl(path: string, id: number) {

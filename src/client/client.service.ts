@@ -20,9 +20,14 @@ export class ClientService {
     });
   }
 
-  addNewClient(dto: CreateClientDto) {
-    return this.prisma.client.create({
-      data: { ...dto },
+  async addNewClient(dto: CreateClientDto) {
+    const client = await this.prisma.client.findUnique({
+      where: { telegramName: dto.telegramName },
     });
+    if (!client) {
+      return this.prisma.client.create({
+        data: { ...dto },
+      });
+    }
   }
 }

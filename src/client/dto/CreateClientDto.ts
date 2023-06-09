@@ -7,6 +7,9 @@ export class CreateClientDto {
   @IsString()
   telephoneNumber: string;
 
+  @IsString()
+  telegramName: string;
+
   @IsOptional()
   @IsString()
   chatId?: string;

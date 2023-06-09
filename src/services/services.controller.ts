@@ -31,6 +31,11 @@ export class ServicesController {
     return this.servicesService.getServicesByCategoryId(id);
   }
 
+  @Post('title')
+  getServiceByTitle(@Body() dto: { title: string }) {
+    return this.servicesService.getServiceByTitle(dto);
+  }
+
   @Post('add')
   addNewService(@Body() dto: CreateServiceDto) {
     return this.servicesService.addNewService(dto);

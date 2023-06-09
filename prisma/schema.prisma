@@ -82,6 +82,7 @@ model Time {
 model Client {
   id Int @id @default(autoincrement())
   name String
+  telegramName String @unique
   telephoneNumber String
   chatId String?
 }
@@ -113,5 +114,4 @@ model AdminInfo {
   id Int @id @default(autoincrement())
   BotPaid String @default("false") 
   payDate String
-  billId String
 }

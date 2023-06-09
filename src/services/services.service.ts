@@ -40,6 +40,12 @@ export class ServicesService {
     });
   }
 
+  getServiceByTitle(dto: { title: string }) {
+    return this.prisma.service.findFirst({
+      where: { title: dto.title },
+    });
+  }
+
   async addNewService(dto: CreateServiceDto) {
     const newService = await this.prisma.service.create({
       data: {

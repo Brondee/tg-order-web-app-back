@@ -9,19 +9,17 @@ import {
   Patch,
 } from '@nestjs/common';
 import { DateService } from './date.service';
-import { CreateDateDto, EditDateDto, EditTimeDto, ReturnTimeDto } from './dto';
+import {
+  CreateDateDto,
+  EditDateDto,
+  EditTimeDto,
+  ReturnTimeDto,
+  CheckTimeDto,
+} from './dto';
 
 @Controller('dates')
 export class DatesController {
   constructor(private dateService: DateService) {}
-
-  @Get('/:date/:specId')
-  getDateTime(
-    @Param('date') date: string,
-    @Param('specId', ParseIntPipe) specId: number,
-  ) {
-    return this.dateService.getDateTime(date, specId);
-  }
 
   @Get('single/:date/:specId')
   getDate(
@@ -31,9 +29,27 @@ export class DatesController {
     return this.dateService.getDate(date, specId);
   }
 
+  @Get('avdates/:specId')
+  getDatesBySpecId(@Param('specId', ParseIntPipe) specId: number) {
+    return this.dateService.getDatesById(specId);
+  }
+
+  @Get('/:date/:specId')
+  getDateTime(
+    @Param('date') date: string,
+    @Param('specId', ParseIntPipe) specId: number,
+  ) {
+    return this.dateService.getDateTime(date, specId);
+  }
+
   @Post('add')
   addDate(@Body() dto: CreateDateDto) {
     return this.dateService.addDate(dto);
+  }
+
+  @Post('check')
+  checkTime(@Body() dto: CheckTimeDto) {
+    return this.dateService.checkTime(dto);
   }
 
   @Patch('editDate')

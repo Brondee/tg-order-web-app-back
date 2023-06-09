@@ -29,7 +29,7 @@ export class GeneralService {
       });
     }
     return this.prisma.general.update({
-      where: { id: generalInfo[0].id },
+      where: { id: generalInfo.id },
       data: { ...dto },
     });
   }
