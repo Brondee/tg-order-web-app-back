@@ -11,6 +11,7 @@ model Service {
   id Int @id @default(autoincrement())
   title String
   price Int
+  priceSecond Int?
   time String @default("")
   isActive Boolean @default(true)
 

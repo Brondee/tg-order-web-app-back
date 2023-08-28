@@ -22,6 +22,10 @@ export class EditServiceDto {
   price: number;
 
   @IsOptional()
+  @IsInt()
+  priceSecond: number;
+
+  @IsOptional()
   @IsString()
   time: string;
 

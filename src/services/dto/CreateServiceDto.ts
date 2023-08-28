@@ -6,6 +6,9 @@ export class CreateServiceDto {
   @IsInt()
   price: number;
 
+  @IsInt()
+  priceSecond: number;
+
   @IsString()
   time: string;
 
